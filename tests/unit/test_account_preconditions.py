@@ -81,5 +81,10 @@ def test_ensure_two_accounts_classifies_transient_api_outage() -> None:
         "accounts": [{"id": 12345, "type": "CHECKING"}],
     }
 
-    with pytest.raises(EnvironmentUnavailable, match="HTTP 503"):
+    with pytest.raises(EnvironmentUnavailable) as error:
         ensure_two_accounts(api_client, session_data)
+
+    assert str(error.value) == (
+        "ParaBank API returned HTTP 503 (temporary service outage) while creating "
+        "the second transfer account; retry later"
+    )

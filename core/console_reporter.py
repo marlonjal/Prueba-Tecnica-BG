@@ -43,6 +43,16 @@ def pytest_configure(config: pytest.Config) -> None:
     if _compact:
         config.option.verbose = -1
         config.option.reportchars = ""
+        if not _traceback_requested(config):
+            config.option.tbstyle = "no"
+
+
+def _traceback_requested(config: pytest.Config) -> bool:
+    """Preserve a traceback style when the caller explicitly requests one."""
+    arguments = tuple(str(argument) for argument in config.invocation_params.args)
+    return "--full-trace" in arguments or any(
+        argument == "--tb" or argument.startswith("--tb=") for argument in arguments
+    )
 
 
 def pytest_collection_finish(session: pytest.Session) -> None:
@@ -61,7 +71,7 @@ def pytest_collection_finish(session: pytest.Session) -> None:
 
     _terminal.write_sep(
         "=",
-        f"PLAN DE EJECUCIÓN: {len(session.items)} PRUEBAS EN {len(_file_order)} ARCHIVOS",
+        _execution_plan_title(len(session.items), len(_file_order)),
     )
     _write_table_border("top")
     _write_table_header()
@@ -210,7 +220,8 @@ def _result_summary(results: Counter[str]) -> str:
     if results["xpass"]:
         details.append(f"{results['xpass']} XPASS")
     if results["skipped"]:
-        details.append(f"{results['skipped']} omitidas")
+        label = "omitida" if results["skipped"] == 1 else "omitidas"
+        details.append(f"{results['skipped']} {label}")
     if results["failed"]:
         label = "fallida" if results["failed"] == 1 else "fallidas"
         details.append(f"{results['failed']} {label}")
@@ -218,6 +229,13 @@ def _result_summary(results: Counter[str]) -> str:
         label = "error" if results["error"] == 1 else "errores"
         details.append(f"{results['error']} {label}")
     return " · ".join(details)
+
+
+def _execution_plan_title(test_count: int, file_count: int) -> str:
+    """Build the execution-plan heading with correct singular or plural labels."""
+    test_label = "PRUEBA" if test_count == 1 else "PRUEBAS"
+    file_label = "ARCHIVO" if file_count == 1 else "ARCHIVOS"
+    return f"PLAN DE EJECUCIÓN: {test_count} {test_label} EN {file_count} {file_label}"
 
 
 def _progress_bar(completed: int, total: int, width: int = 12) -> str:
@@ -257,7 +275,7 @@ def _incident_detail(report: pytest.TestReport) -> str:
     """Extract and clean the most useful one-line explanation from a report."""
     if hasattr(report, "wasxfail"):
         detail = str(report.wasxfail)
-        return detail.removeprefix("reason: ")
+        return _compact_detail(detail.removeprefix("reason: "))
     if report.skipped:
         detail = (
             str(report.longrepr[2])
@@ -270,10 +288,25 @@ def _incident_detail(report: pytest.TestReport) -> str:
         )
         for prefix in prefixes:
             if detail.startswith(prefix):
-                return detail[len(prefix) :]
-        return detail
+                return _compact_detail(detail[len(prefix) :])
+        return _compact_detail(detail)
+
+    reprcrash = getattr(getattr(report, "longrepr", None), "reprcrash", None)
+    if reprcrash is not None:
+        message = str(reprcrash.message).splitlines()[0].strip()
+        location = f"{PurePath(str(reprcrash.path)).name}:{reprcrash.lineno}"
+        if message:
+            return _compact_detail(f"{message} ({location})")
     lines = report.longreprtext.strip().splitlines()
-    return lines[-1] if lines else "Sin detalle disponible"
+    return _compact_detail(lines[-1]) if lines else "Sin detalle disponible"
+
+
+def _compact_detail(detail: str, limit: int = 180) -> str:
+    """Normalize noisy diagnostics and cap them to a readable table length."""
+    normalized = " ".join(detail.split())
+    if len(normalized) <= limit:
+        return normalized
+    return f"{normalized[: limit - 1].rstrip()}…"
 
 
 def _incident_row_lines(
