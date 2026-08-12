@@ -11,6 +11,9 @@ from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_
 
 from config.settings import PROJECT_ROOT, settings
 from core.artifacts import artifact_slug, safe_screenshot
+from core.exceptions import EnvironmentUnavailable
+from models.user import UserFactory
+from pages.registration_page import RegistrationPage
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 REPORTS_DIR = RESULTS_DIR / "reports"
@@ -34,10 +37,16 @@ def pytest_sessionstart(session: pytest.Session) -> None:
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo):
-    """Expose setup/call/teardown results to evidence fixtures."""
-    del call
+    """Expose reports and classify verified environment outages as skipped."""
     outcome = yield
     report = outcome.get_result()
+    if call.excinfo and isinstance(call.excinfo.value, EnvironmentUnavailable):
+        report.outcome = "skipped"
+        report.longrepr = (
+            str(item.path),
+            0,
+            f"SKIPPED because the shared environment is unavailable: {call.excinfo.value}",
+        )
     setattr(item, f"report_{report.when}", report)
 
 
@@ -136,3 +145,13 @@ def api_context(playwright_instance: Playwright):
 def scenario_state() -> dict:
     """Keep mutable scenario data isolated from every other test."""
     return {}
+
+
+@pytest.fixture
+def registration_page(page: Page) -> RegistrationPage:
+    return RegistrationPage(page)
+
+
+@pytest.fixture
+def valid_user():
+    return UserFactory.valid()
