@@ -13,6 +13,8 @@ from config.settings import PROJECT_ROOT, settings
 from core.artifacts import artifact_slug, safe_screenshot
 from core.exceptions import EnvironmentUnavailable
 from models.user import UserFactory
+from pages.accounts_page import AccountsPage
+from pages.login_page import LoginPage
 from pages.registration_page import RegistrationPage
 
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -155,3 +157,13 @@ def registration_page(page: Page) -> RegistrationPage:
 @pytest.fixture
 def valid_user():
     return UserFactory.valid()
+
+
+@pytest.fixture
+def login_page(page: Page) -> LoginPage:
+    return LoginPage(page)
+
+
+@pytest.fixture
+def accounts_page(page: Page) -> AccountsPage:
+    return AccountsPage(page)
