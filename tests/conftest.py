@@ -16,6 +16,7 @@ from models.user import UserFactory
 from pages.accounts_page import AccountsPage
 from pages.login_page import LoginPage
 from pages.registration_page import RegistrationPage
+from pages.transfer_page import TransferPage
 from services.parabank_api import ParaBankApi
 
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -200,3 +201,8 @@ def login_page(page: Page) -> LoginPage:
 @pytest.fixture
 def accounts_page(page: Page) -> AccountsPage:
     return AccountsPage(page)
+
+
+@pytest.fixture
+def transfer_page(page: Page) -> TransferPage:
+    return TransferPage(page)

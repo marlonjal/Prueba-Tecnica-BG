@@ -42,3 +42,21 @@ def test_withdraw_omits_missing_amount() -> None:
     ParaBankApi(request).withdraw("12345", None)
 
     assert request.calls == [("POST", "withdraw", {"accountId": "12345"})]
+
+
+def test_transfer_serializes_account_and_amount_parameters() -> None:
+    request = FakeRequestContext()
+
+    ParaBankApi(request).transfer(12345, 67890, Decimal("5.25"))
+
+    assert request.calls == [
+        (
+            "POST",
+            "transfer",
+            {
+                "fromAccountId": "12345",
+                "toAccountId": "67890",
+                "amount": "5.25",
+            },
+        )
+    ]

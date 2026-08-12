@@ -7,16 +7,9 @@ from decimal import Decimal
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
+from tests.support.api_responses import response_is_rejected
+
 scenarios("../features/withdrawal.feature")
-
-
-def response_is_rejected(response, api_client) -> bool:
-    response_text = api_client.response_text(response).lower()
-    return not response.ok or any(
-        token in response_text
-        for token in ("error", "invalid", "could not", "not found", "insufficient")
-    )
-
 
 @given("que autentico por API al cliente configurado y obtengo una cuenta")
 def authenticated_account(api_session_data, scenario_state):
