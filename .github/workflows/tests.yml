@@ -1,0 +1,40 @@
+name: Playwright tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_destructive:
+        description: "Run scenarios that modify customers, accounts, or balances"
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: ["master", "feature/development_test"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Playwright test image
+        run: docker compose build tests
+
+      - name: Run safe regression
+        if: github.event_name != 'workflow_dispatch' || inputs.include_destructive != true
+        run: docker compose run --rm tests
+
+      - name: Run full regression
+        if: github.event_name == 'workflow_dispatch' && inputs.include_destructive == true
+        run: docker compose run --rm tests python -m pytest
+
+      - name: Upload Playwright evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results
+          path: results/
+          if-no-files-found: warn
+          retention-days: 7
