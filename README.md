@@ -35,6 +35,70 @@ docker compose run --rm tests python -m pytest
 Los escenarios destructivos pueden crear clientes o modificar cuentas y saldos
 del ambiente público compartido.
 
+### Ejecución por tipo de prueba con Docker
+
+Los marcadores de Pytest permiten ejecutar grupos específicos. Las variantes
+seguras agregan `and not destructive` para impedir cambios persistentes.
+
+```bash
+# Regresión segura: excluye creación de clientes y movimientos de saldos
+docker compose run --rm tests
+
+# Casos positivos seguros
+docker compose run --rm tests python -m pytest -m "positive and not destructive" -v
+
+# Casos negativos seguros
+docker compose run --rm tests python -m pytest -m "negative and not destructive" -v
+
+# Casos de interfaz web seguros
+docker compose run --rm tests python -m pytest -m "ui and not destructive" -v
+
+# Recorrido crítico seguro
+docker compose run --rm tests python -m pytest -m "smoke and not destructive" -v
+
+# Pruebas unitarias del framework, sin acceder a ParaBank
+docker compose run --rm tests python -m pytest tests/unit -q
+```
+
+Los siguientes comandos incluyen operaciones potencialmente persistentes y
+deben ejecutarse conscientemente contra el ambiente público:
+
+```bash
+# Todos los casos positivos, incluidos registro, retiro y transferencia
+docker compose run --rm tests python -m pytest -m positive -v
+
+# Todos los casos negativos; un defecto del SUT podría aceptar una operación
+docker compose run --rm tests python -m pytest -m negative -v
+
+# Todos los casos de interfaz web
+docker compose run --rm tests python -m pytest -m ui -v
+
+# Todos los casos del API REST; retiros y transferencias modifican saldos
+docker compose run --rm tests python -m pytest -m api -v
+
+# Únicamente escenarios que pueden modificar datos o saldos
+docker compose run --rm tests python -m pytest -m destructive -v
+
+# Regresión completa: escenarios BDD y pruebas unitarias
+docker compose run --rm tests python -m pytest -v
+```
+
+También se puede ejecutar una funcionalidad concreta por archivo:
+
+```bash
+docker compose run --rm tests python -m pytest tests/steps/test_registration_steps.py -v
+docker compose run --rm tests python -m pytest tests/steps/test_login_steps.py -v
+docker compose run --rm tests python -m pytest tests/steps/test_withdrawal_steps.py -v
+docker compose run --rm tests python -m pytest tests/steps/test_transfer_steps.py -v
+```
+
+Para revisar qué casos selecciona un marcador sin ejecutarlos, añada
+`--collect-only`:
+
+```bash
+docker compose run --rm tests python -m pytest -m negative --collect-only -q
+```
+
 ## Ejecución local
 
 ```powershell
