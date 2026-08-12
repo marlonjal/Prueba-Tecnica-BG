@@ -1,4 +1,4 @@
-# Prueba técnica QA Automatizador - Banco Guayaquil
+# Prueba técnica Automation QA Engineer - Banco Guayaquil
 
 Suite funcional para los flujos de registro, autenticación, retiro y
 transferencia de fondos en [ParaBank](https://parabank.parasoft.com/parabank/).
