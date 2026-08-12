@@ -8,9 +8,11 @@ TRANSIENT_HTTP_STATUSES = {429, 502, 503, 504}
 def raise_for_transient_response(response, api_client, operation: str) -> None:
     """Prevent infrastructure outages from becoming functional results."""
     if response.status in TRANSIENT_HTTP_STATUSES:
+        del api_client
+        cause = "rate limit" if response.status == 429 else "temporary service outage"
         raise EnvironmentUnavailable(
-            f"ParaBank API returned HTTP {response.status} while {operation}: "
-            f"{api_client.response_text(response)}"
+            f"ParaBank API returned HTTP {response.status} ({cause}) while {operation}; "
+            "retry later"
         )
 
 

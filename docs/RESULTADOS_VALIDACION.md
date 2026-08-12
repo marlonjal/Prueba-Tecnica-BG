@@ -10,12 +10,13 @@
 
 ## Resultados comprobados
 
-- Pruebas unitarias: **32 aprobadas**.
-- Colección: **67 pruebas** (35 BDD y 32 unitarias).
+- Pruebas unitarias: **34 aprobadas**.
+- Colección: **69 pruebas** (35 BDD y 34 unitarias).
 - Registro no destructivo: **11 aprobadas**, 2 excluidas.
 - Login y logout: **4 aprobadas**, 2 `XFAIL`.
-- Regresión segura consolidada en Docker: **46 aprobadas**, **2 `XFAIL`** y
-  **19 excluidas** por el marcador `destructive`; código de salida `0`.
+- Regresión segura consolidada en Docker: **47 aprobadas**, **1 omitida** por
+  reto de seguridad de Cloudflare, **2 `XFAIL`** y **19 excluidas** por el
+  marcador `destructive`; código de salida `0`.
 
 Las features de retiro y transferencia fueron recolectadas y sus Page/Service
 Objects se validaron localmente. No se ejecutaron contra el ambiente público

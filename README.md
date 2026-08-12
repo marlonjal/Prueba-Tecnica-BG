@@ -1,4 +1,4 @@
-# Prueba técnica QA Automatizador - Banco Guayaquil
+# Prueba técnica Automation QA Engineer - Banco Guayaquil
 
 Suite funcional para los flujos de registro, autenticación, retiro y
 transferencia de fondos en [ParaBank](https://parabank.parasoft.com/parabank/).
@@ -44,8 +44,10 @@ La regresión segura excluye automáticamente los escenarios `destructive`. Los
 comandos de pruebas positivas, negativas y suite completa sí pueden crear
 clientes o modificar cuentas y saldos del ambiente público.
 
-Todos los comandos de prueba muestran la tabla compacta por archivo. Si alguna
-prueba falla, Pytest conserva debajo el detalle y la traza para diagnosticarla.
+Todos los comandos de prueba muestran tablas compactas y alineadas por archivo.
+Las incidencias se resumen en consola y el diagnóstico completo queda en el
+reporte HTML. Para solicitar también el traceback nativo, agregue `--tb=short`
+al comando que necesite investigar.
 
 ## Configuración
 
