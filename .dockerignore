@@ -1,3 +1,4 @@
+# Exclude repository metadata, local environments, and Python caches from images.
 .git
 .github
 .venv
@@ -6,6 +7,8 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 .pytest_cache
+
+# Never copy secrets, generated evidence, temporary output, or challenge material.
 .env
 results/*
 test-results/

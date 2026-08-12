@@ -1,6 +1,14 @@
+# Browser automation runtime.
 playwright==1.52.0
+
+# Test runner, BDD integration, and human-readable reports.
 pytest==8.3.4
 pytest-bdd==7.3.0
 pytest-html==4.1.1
+
+# Environment loading and isolated synthetic customer data.
 python-dotenv==1.0.1
 faker==37.1.0
+
+# Native Excel report generation after every Pytest execution.
+openpyxl==3.1.5

@@ -6,6 +6,7 @@ from pages.login_page import LoginPage
 
 
 def test_login_page_fills_credentials_and_submits(page: Page) -> None:
+    """Verify that LoginPage fills both credentials and submits the form."""
     page.set_content(
         """
         <form onsubmit="window.submitted = true; return false">

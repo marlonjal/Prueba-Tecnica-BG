@@ -10,12 +10,12 @@
 
 ## Resultados comprobados
 
-- Pruebas unitarias: **21 aprobadas**.
-- Colección: **56 pruebas** (35 BDD y 21 unitarias).
+- Pruebas unitarias: **32 aprobadas**.
+- Colección: **67 pruebas** (35 BDD y 32 unitarias).
 - Registro no destructivo: **11 aprobadas**, 2 excluidas.
 - Login y logout: **4 aprobadas**, 2 `XFAIL`.
-- Regresión segura consolidada en Docker: **36 aprobadas**, **2 `XFAIL`** y
-  **18 excluidas** por el marcador `destructive`; código de salida `0`.
+- Regresión segura consolidada en Docker: **46 aprobadas**, **2 `XFAIL`** y
+  **19 excluidas** por el marcador `destructive`; código de salida `0`.
 
 Las features de retiro y transferencia fueron recolectadas y sus Page/Service
 Objects se validaron localmente. No se ejecutaron contra el ambiente público

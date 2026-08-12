@@ -4,6 +4,7 @@ from models.user import UserFactory
 
 
 def test_user_factory_generates_unique_valid_credentials() -> None:
+    """Verify unique users have internally consistent credentials."""
     first = UserFactory.valid()
     second = UserFactory.valid()
 

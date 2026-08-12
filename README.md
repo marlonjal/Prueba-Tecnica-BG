@@ -12,115 +12,40 @@ Está construida con Python, Playwright, Pytest, pytest-bdd y Page Object Model.
 - Reportes HTML con pytest-html y JSON con pytest-bdd.
 - Docker y Docker Compose como forma recomendada de ejecución.
 
-## Ejecución recomendada con Docker
+## Preparación y ejecución con Docker
 
 Requisitos: Git, Docker Desktop o Docker Engine con Compose y acceso HTTPS a
 ParaBank.
 
 ```bash
+# Preparación inicial
 git clone git@github.com:marlonjal/Prueba-Tecnica-BG.git
 cd Prueba-Tecnica-BG
 git switch feature/development_test
 docker compose build tests
-docker compose run --rm tests
-```
 
-El comando predeterminado ejecuta la regresión segura y excluye los escenarios
-`destructive`. Para ejecutar conscientemente la suite completa:
-
-```bash
-docker compose run --rm tests python -m pytest
-```
-
-Los escenarios destructivos pueden crear clientes o modificar cuentas y saldos
-del ambiente público compartido.
-
-### Ejecución por tipo de prueba con Docker
-
-Los marcadores de Pytest permiten ejecutar grupos específicos. Las variantes
-seguras agregan `and not destructive` para impedir cambios persistentes.
-
-```bash
-# Regresión segura: excluye creación de clientes y movimientos de saldos
+# Regresión segura recomendada
 docker compose run --rm tests
 
-# Casos positivos seguros
-docker compose run --rm tests python -m pytest -m "positive and not destructive" -v
+# Pruebas unitarias del framework
+docker compose run --rm tests python -m pytest tests/unit -q
 
-# Casos negativos seguros
-docker compose run --rm tests python -m pytest -m "negative and not destructive" -v
-
-# Casos de interfaz web seguros
-docker compose run --rm tests python -m pytest -m "ui and not destructive" -v
-
-# Recorrido crítico seguro
-docker compose run --rm tests python -m pytest -m "smoke and not destructive" -v
-
-# Pruebas unitarias del framework, mostrando cada prueba y su estado
-docker compose run --rm tests python -m pytest tests/unit -v
-```
-
-Los siguientes comandos incluyen operaciones potencialmente persistentes y
-deben ejecutarse conscientemente contra el ambiente público:
-
-```bash
-# Todos los casos positivos, incluidos registro, retiro y transferencia
+# Pruebas positivas
 docker compose run --rm tests python -m pytest -m positive -v
 
-# Todos los casos negativos; un defecto del SUT podría aceptar una operación
+# Pruebas negativas
 docker compose run --rm tests python -m pytest -m negative -v
 
-# Todos los casos de interfaz web
-docker compose run --rm tests python -m pytest -m ui -v
-
-# Todos los casos del API REST; retiros y transferencias modifican saldos
-docker compose run --rm tests python -m pytest -m api -v
-
-# Únicamente escenarios que pueden modificar datos o saldos
-docker compose run --rm tests python -m pytest -m destructive -v
-
-# Regresión completa: escenarios BDD y pruebas unitarias
+# Suite completa
 docker compose run --rm tests python -m pytest -v
 ```
 
-También se puede ejecutar una funcionalidad concreta por archivo:
+La regresión segura excluye automáticamente los escenarios `destructive`. Los
+comandos de pruebas positivas, negativas y suite completa sí pueden crear
+clientes o modificar cuentas y saldos del ambiente público.
 
-```bash
-docker compose run --rm tests python -m pytest tests/steps/test_registration_steps.py -v
-docker compose run --rm tests python -m pytest tests/steps/test_login_steps.py -v
-docker compose run --rm tests python -m pytest tests/steps/test_withdrawal_steps.py -v
-docker compose run --rm tests python -m pytest tests/steps/test_transfer_steps.py -v
-```
-
-Para revisar qué casos selecciona un marcador sin ejecutarlos, añada
-`--collect-only`:
-
-```bash
-docker compose run --rm tests python -m pytest -m negative --collect-only -q
-```
-
-## Ejecución local
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m playwright install chromium
-python -m pytest -m "not destructive"
-```
-
-Comandos focalizados:
-
-```powershell
-# Pruebas unitarias del framework, mostrando cada prueba y su estado
-python -m pytest tests/unit -v
-
-# Casos UI seguros
-python -m pytest -m "ui and not destructive" -v
-
-# Verificar la colección sin ejecutar escenarios
-python -m pytest --collect-only -q
-```
+Todos los comandos de prueba muestran la tabla compacta por archivo. Si alguna
+prueba falla, Pytest conserva debajo el detalle y la traza para diagnosticarla.
 
 ## Configuración
 
@@ -182,8 +107,9 @@ La suite reúne 35 escenarios BDD:
 | Transferencia | 6 | 3 | 9 |
 | **Total** | **25** | **10** | **35** |
 
-Adicionalmente, 21 pruebas unitarias protegen configuración, evidencias,
-selectores, datos, autenticación y construcción de solicitudes API.
+Adicionalmente, 32 pruebas unitarias protegen configuración, evidencias,
+selectores, datos, autenticación, precondiciones y construcción de solicitudes
+API.
 
 ## Reportes y evidencias
 
@@ -191,6 +117,8 @@ Toda salida queda bajo `results/`, excluida de Git:
 
 - `results/reports/report.html`: reporte HTML autocontenido.
 - `results/reports/cucumber-report.json`: resultados Cucumber JSON.
+- `results/reports/test-results.xlsx`: libro de Excel con resumen visual y una
+  fila por prueba, incluyendo estado, duración y detalle.
 - `results/screenshots/<caso>/`: estado final, fallo y pasos opcionales.
 - `results/videos/<caso>.webm`: video de cada escenario UI.
 - `results/traces/<caso>.zip`: trace de Playwright con red y snapshots.

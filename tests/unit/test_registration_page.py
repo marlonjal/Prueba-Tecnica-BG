@@ -7,6 +7,7 @@ from pages.registration_page import RegistrationPage
 
 
 def test_registration_page_fills_every_customer_field(page: Page) -> None:
+    """Verify that RegistrationPage maps every User field to its input."""
     inputs = "".join(
         f'<input name="{selector.split(chr(34))[1]}">'
         for selector in RegistrationPage.FIELD_SELECTORS.values()
@@ -22,6 +23,7 @@ def test_registration_page_fills_every_customer_field(page: Page) -> None:
 
 
 def test_registration_page_leaves_omitted_field_empty(page: Page) -> None:
+    """Verify that the requested field remains intentionally empty."""
     inputs = "".join(
         f'<input name="{selector.split(chr(34))[1]}">'
         for selector in RegistrationPage.FIELD_SELECTORS.values()

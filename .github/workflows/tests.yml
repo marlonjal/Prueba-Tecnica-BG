@@ -1,5 +1,6 @@
 name: Playwright tests
 
+# Run safe checks automatically and expose destructive execution only manually.
 on:
   workflow_dispatch:
     inputs:
@@ -14,22 +15,28 @@ on:
 
 jobs:
   test:
+    # Keep browser execution bounded on GitHub-hosted Linux infrastructure.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Fetch the exact revision that triggered this workflow.
       - uses: actions/checkout@v4
 
+      # Build the same image used by developers locally.
       - name: Build Playwright test image
         run: docker compose build tests
 
+      # Default path for pushes, pull requests, and safe manual dispatches.
       - name: Run safe regression
         if: github.event_name != 'workflow_dispatch' || inputs.include_destructive != true
         run: docker compose run --rm tests
 
+      # Explicit opt-in path that may modify public ParaBank data and balances.
       - name: Run full regression
         if: github.event_name == 'workflow_dispatch' && inputs.include_destructive == true
         run: docker compose run --rm tests python -m pytest
 
+      # Preserve diagnostics even when tests fail or the environment is unavailable.
       - name: Upload Playwright evidence
         uses: actions/upload-artifact@v4
         if: always()

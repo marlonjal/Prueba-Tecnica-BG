@@ -12,6 +12,8 @@ fake = Faker("en_US")
 
 @dataclass(frozen=True)
 class User:
+    """Represent all customer fields required by the ParaBank form."""
+
     first_name: str
     last_name: str
     street: str
@@ -25,6 +27,7 @@ class User:
     confirmation: str
 
     def as_dict(self) -> dict[str, str]:
+        """Return the immutable user data as a serializable dictionary."""
         return asdict(self)
 
 
@@ -33,6 +36,7 @@ class UserFactory:
 
     @staticmethod
     def valid() -> User:
+        """Generate a valid customer with credentials unique to this run."""
         suffix = uuid4().hex[:10]
         password = f"Qa!{suffix}"
         return User(

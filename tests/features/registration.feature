@@ -29,7 +29,7 @@ Feature: Registro de clientes
       | password     |
       | confirmation |
 
-  @negative
+  @negative @destructive
   Scenario: Registro rechazado cuando las contraseñas no coinciden
     Given que abro el formulario público de registro
     When envío un registro cuyas contraseñas no coinciden

@@ -8,9 +8,12 @@ from core.exceptions import EnvironmentUnavailable
 
 
 class BasePage:
+    """Provide navigation and environment checks shared by every Page Object."""
+
     TRANSIENT_HTTP_STATUSES = {429, 502, 503, 504}
 
     def __init__(self, page: Page) -> None:
+        """Store the Playwright page used by the concrete Page Object."""
         self.page = page
 
     def open(self, path: str) -> None:
@@ -31,3 +34,15 @@ class BasePage:
                         f"ParaBank did not respond after two attempts: {target}"
                     ) from error
             self.page.goto("about:blank", wait_until="commit", timeout=5_000)
+
+    def raise_if_security_challenge(self) -> None:
+        """Classify anti-bot interstitials as shared-environment outages."""
+        body_text = self.page.locator("body").inner_text().lower()
+        challenge_markers = (
+            "performing security verification",
+            "verify you are human",
+        )
+        if any(marker in body_text for marker in challenge_markers):
+            raise EnvironmentUnavailable(
+                "ParaBank redirected the browser to a Cloudflare security challenge"
+            )

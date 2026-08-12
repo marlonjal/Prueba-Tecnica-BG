@@ -15,9 +15,12 @@ from core.exceptions import EnvironmentUnavailable
 from models.user import UserFactory
 from pages.accounts_page import AccountsPage
 from pages.login_page import LoginPage
+from pages.open_account_page import OpenAccountPage
 from pages.registration_page import RegistrationPage
 from pages.transfer_page import TransferPage
 from services.parabank_api import ParaBankApi
+
+pytest_plugins = ["core.console_reporter", "core.result_exporter"]
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 REPORTS_DIR = RESULTS_DIR / "reports"
@@ -55,6 +58,7 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo):
 
 
 def pytest_bdd_before_scenario(request, feature, scenario) -> None:
+    """Initialize scenario metadata used to name step evidence."""
     del feature
     request.node._scenario_name = scenario.name
     request.node._step_counter = 0
@@ -79,12 +83,14 @@ def pytest_bdd_after_step(request, feature, scenario, step, step_func, step_func
 
 @pytest.fixture(scope="session")
 def playwright_instance() -> Playwright:
+    """Start one Playwright runtime and share it throughout the test session."""
     with sync_playwright() as playwright:
         yield playwright
 
 
 @pytest.fixture(scope="session")
 def browser(playwright_instance: Playwright) -> Browser:
+    """Launch the configured browser once and close it after the session."""
     browser_type = getattr(playwright_instance, settings.browser, None)
     if browser_type is None:
         raise ValueError(f"Unsupported browser: {settings.browser}")
@@ -129,6 +135,7 @@ def browser_context(browser: Browser, request: pytest.FixtureRequest) -> Browser
 
 @pytest.fixture
 def page(browser_context: BrowserContext, request: pytest.FixtureRequest) -> Page:
+    """Create the active page and expose it to evidence hooks."""
     active_page = browser_context.new_page()
     request.node._active_page = active_page
     yield active_page
@@ -136,6 +143,7 @@ def page(browser_context: BrowserContext, request: pytest.FixtureRequest) -> Pag
 
 @pytest.fixture(scope="session")
 def api_context(playwright_instance: Playwright):
+    """Create the session-scoped HTTP context for ParaBank API calls."""
     context = playwright_instance.request.new_context(
         base_url=f"{settings.api_url}/",
         extra_http_headers={"Accept": "application/json"},
@@ -147,6 +155,7 @@ def api_context(playwright_instance: Playwright):
 
 @pytest.fixture(scope="session")
 def api_client(api_context) -> ParaBankApi:
+    """Provide the Service Object backed by the shared HTTP context."""
     return ParaBankApi(api_context)
 
 
@@ -185,24 +194,35 @@ def scenario_state() -> dict:
 
 @pytest.fixture
 def registration_page(page: Page) -> RegistrationPage:
+    """Provide the registration Page Object for the active test page."""
     return RegistrationPage(page)
 
 
 @pytest.fixture
 def valid_user():
+    """Generate isolated valid customer data for one scenario."""
     return UserFactory.valid()
 
 
 @pytest.fixture
 def login_page(page: Page) -> LoginPage:
+    """Provide the login Page Object for the active test page."""
     return LoginPage(page)
 
 
 @pytest.fixture
 def accounts_page(page: Page) -> AccountsPage:
+    """Provide the account-overview Page Object for the active test page."""
     return AccountsPage(page)
 
 
 @pytest.fixture
+def open_account_page(page: Page) -> OpenAccountPage:
+    """Provide the account-creation Page Object for the active test page."""
+    return OpenAccountPage(page)
+
+
+@pytest.fixture
 def transfer_page(page: Page) -> TransferPage:
+    """Provide the transfer Page Object for the active test page."""
     return TransferPage(page)
