@@ -16,6 +16,7 @@ from models.user import UserFactory
 from pages.accounts_page import AccountsPage
 from pages.login_page import LoginPage
 from pages.registration_page import RegistrationPage
+from services.parabank_api import ParaBankApi
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 REPORTS_DIR = RESULTS_DIR / "reports"
@@ -141,6 +142,38 @@ def api_context(playwright_instance: Playwright):
     )
     yield context
     context.dispose()
+
+
+@pytest.fixture(scope="session")
+def api_client(api_context) -> ParaBankApi:
+    return ParaBankApi(api_context)
+
+
+@pytest.fixture(scope="session")
+def api_session_data(api_client: ParaBankApi) -> dict:
+    """Authenticate once and reuse public customer metadata across API scenarios."""
+    login_response = api_client.login(settings.username, settings.password)
+    if login_response.status in {429, 502, 503, 504}:
+        raise EnvironmentUnavailable(
+            f"ParaBank API login returned HTTP {login_response.status}"
+        )
+    login_text = api_client.response_text(login_response)
+    if not login_response.ok:
+        raise EnvironmentUnavailable(
+            f"ParaBank API login failed ({login_response.status}): {login_text}"
+        )
+
+    customer = login_response.json()
+    accounts_response = api_client.customer_accounts(customer["id"])
+    if not accounts_response.ok:
+        raise EnvironmentUnavailable(
+            "ParaBank account query failed "
+            f"({accounts_response.status}): {api_client.response_text(accounts_response)}"
+        )
+    accounts = accounts_response.json()
+    if not accounts:
+        raise EnvironmentUnavailable("The configured customer has no accounts")
+    return {"customer": customer, "accounts": accounts}
 
 
 @pytest.fixture
