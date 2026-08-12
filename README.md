@@ -56,8 +56,8 @@ docker compose run --rm tests python -m pytest -m "ui and not destructive" -v
 # Recorrido crítico seguro
 docker compose run --rm tests python -m pytest -m "smoke and not destructive" -v
 
-# Pruebas unitarias del framework, sin acceder a ParaBank
-docker compose run --rm tests python -m pytest tests/unit -q
+# Pruebas unitarias del framework, mostrando cada prueba y su estado
+docker compose run --rm tests python -m pytest tests/unit -v
 ```
 
 Los siguientes comandos incluyen operaciones potencialmente persistentes y
@@ -112,8 +112,8 @@ python -m pytest -m "not destructive"
 Comandos focalizados:
 
 ```powershell
-# Pruebas unitarias del framework
-python -m pytest tests/unit -q
+# Pruebas unitarias del framework, mostrando cada prueba y su estado
+python -m pytest tests/unit -v
 
 # Casos UI seguros
 python -m pytest -m "ui and not destructive" -v
