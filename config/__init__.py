@@ -1,0 +1,1 @@
+"""Centralized test framework configuration."""

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Secrets and local configuration
+.env
+!.env.example
+
+# Confidential challenge material
+PruebaTecnicaQaAutomatizador.pdf
+
+# Test evidence and generated reports
+results/*
+!results/.gitkeep
+test-results/
+artifacts/
+reports/
+tmp/
+
+# Local workspace metadata
+.github/prompts/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
